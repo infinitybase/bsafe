@@ -1,32 +1,35 @@
 {
-    "name": "bsafe",
+    "name": "@infinitybase/sdk",
     "version": "0.0.79",
-    "description": "A signature validation package built based on sway in the fuel network",
     "author": "InfinityBase - Guilherme Roque",
     "license": "Apache-2.0",
+    "main": "src/index.ts",
     "engines": {
         "node": ">=18.14.1",
         "pnpm": ">=8"
     },
-    "workspaces": [
-        "./packages/*"
-    ],
+    "publishConfig": {
+        "access": "public",
+        "main": "dist/index.js",
+        "module": "dist/index.mjs",
+        "types": "dist/index.d.ts",
+        "typings": "dist/index.d.ts",
+        "exports": {
+            ".": {
+                "require": "./dist/index.js",
+                "types": "./dist/index.d.ts",
+                "default": "./dist/index.mjs"
+            }
+        }
+    },
     "files": [
         "dist"
     ],
     "scripts": {
-        "build": "turbo run build",
-        "build:sway": "turbo run build:sway",
-        "build:sdk": "turbo run build:sdk",
-        "test": "node --experimental-vm-modules ./node_modules/jest/bin/jest.js --runInBand --detectOpenHandles --forceExit --verbose",
-        "chain:start": "make -C ./docker/chain start",
-        "chain:stop": "make -C ./docker/chain stop",
-        "chain:clean": "make -C ./docker/chain clean",
-        "chain:restart": "make -C ./docker/chain restart"
-    },
-    "resolutions": {
-        "wrap-ansi": "7.0.0",
-        "string-width": "4.1.0"
+        "build:sdk": "yarn build:esm && yarn build:cjs",
+        "build:esm": "tsc",
+        "build:cjs": "tsc --module CommonJS --outDir dist/cjs",
+        "test": "node --experimental-vm-modules ./node_modules/jest/bin/jest.js --runInBand --detectOpenHandles --forceExit --verbose"
     },
     "devDependencies": {
         "@types/elliptic": "^6.4.14",
@@ -47,15 +50,13 @@
         "fuels": "0.63.0"
     },
     "dependencies": {
-        "@infinitybase/sdk": "^0.0.79",
-        "@infinitybase/sway": "^0.0.79",
+        "@infinitybase/sway": "*",
         "@types/mocha": "^10.0.1",
         "@types/uuid": "^9.0.6",
         "axios": "^1.5.1",
         "elliptic": "^6.5.4",
         "fuels": "0.63.0",
         "pnpm": "^8.10.0",
-        "sdk": "link:/Users/guimroque/Infinity/bsafe/bsafe/packages/sdk",
         "tsup": "^7.2.0",
         "uuid": "^9.0.1"
     }

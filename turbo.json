@@ -1,0 +1,15 @@
+{
+    "$schema": "https://turbo.build/schema.json",
+    "globalEnv": ["NODE_ENV"],
+    "pipeline": {
+        "build:sdk": {
+            "cache": false,
+            "dependsOn": ["build:sway"],
+            "outputs": ["dist/**"]
+        },
+        "build:sway": {
+            "cache": false,
+            "outputs": ["dist/**"]
+        }
+    }
+}

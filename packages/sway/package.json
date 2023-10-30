@@ -1,0 +1,28 @@
+{
+    "name": "@infinitybase/sway",
+    "main": "./dist/index.ts",
+    "engines": {
+        "node": ">=18.14.1",
+        "pnpm": ">=8"
+    },
+    "publishConfig": {
+        "access": "public",
+        "main": "dist/index.js",
+        "module": "dist/index.mjs",
+        "types": "dist/index.d.ts",
+        "typings": "dist/index.d.ts",
+        "exports": {
+            ".": {
+                "require": "./dist/index.js",
+                "types": "./dist/index.d.ts",
+                "default": "./dist/index.mjs"
+            }
+        }
+    },
+    "scripts": {
+        "build:sway": "node build.js"
+    },
+    "dependencies": {
+        "fuels": "0.63.0"
+    }
+}

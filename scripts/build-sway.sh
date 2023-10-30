@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Caminho para o diretório com o package.json
-DIR="src/library/sway/"
+DIR="packages/sway"
 
 # Remove o diretório dist
 rm -rf "$DIR/dist"

@@ -1,7 +1,8 @@
 import { Predicate, Provider } from 'fuels';
+import { predicateABI, predicateBIN } from '@infinitybase/sway';
 
 import { IListTransactions, IPredicate, IPredicateService, IBSAFEAuth, PredicateService } from '../api';
-import { IPayloadTransfer, Transfer, predicateABI, predicateBIN, makeHashPredicate, makeSubscribers, IConfVault, IPayloadVault, IVault, IBSAFEApi } from '../';
+import { IPayloadTransfer, Transfer, makeHashPredicate, makeSubscribers, IConfVault, IPayloadVault, IVault, IBSAFEApi } from '../';
 import { v4 as uuidv4 } from 'uuid';
 
 /**

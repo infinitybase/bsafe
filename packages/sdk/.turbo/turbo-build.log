@@ -1,0 +1,10 @@
+
+> @infinitybase/sdk@0.0.79 build /Users/guimroque/Infinity/bsafe/bsafe/packages/sdk
+> yarn build:esm && yarn build:cjs
+
+yarn run v1.22.19
+$ tsc
+../sway/index.ts(1,44): error TS2307: Cannot find module './dist/index' or its corresponding type declarations.
+error Command failed with exit code 2.
+info Visit https://yarnpkg.com/en/docs/cli/run for documentation about this command.
+ ELIFECYCLE  Command failed with exit code 2.

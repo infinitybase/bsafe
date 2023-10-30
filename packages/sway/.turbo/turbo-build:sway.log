@@ -1,0 +1,18 @@
+
+> @infinitybase/sway@ build:sway /Users/guimroque/Infinity/bsafe/bsafe/packages/sway
+> node build.js
+
+ [1;32mCompiling[0m library [1mcore[0m (/Users/guimroque/.forc/git/checkouts/std-9be0d6062747ea7/04a597093e7441898933dd412b8e4dc6ac860cd3/sway-lib-core)
+ [1;32mCompiling[0m library [1mstd[0m (git+https://github.com/fuellabs/sway?tag=v0.44.1#04a597093e7441898933dd412b8e4dc6ac860cd3)
+ [1;32mCompiling[0m library [1mlibraries[0m (/Users/guimroque/Infinity/bsafe/bsafe/packages/sway/src/libraries)
+ [1;32mCompiling[0m predicate [1mpredicate[0m (/Users/guimroque/Infinity/bsafe/bsafe/packages/sway/src/predicate)
+  [1;32mFinished[0m debug in 1.502138333s
+   [1;32mlibrary[0m [1mlibraries[0m
+      Bytecode size: 28 bytes
+ [1;32mpredicate[0m [1mpredicate[0m
+      Bytecode size: 3276 bytes
+      Predicate root: 0x6dbe9e0b053aad79278355496cd49b2ce08a79223e321e787fb4659e91fdb180
+Create export file...
+Clean dist folder
+Save binary to main
+✅ Done!
