@@ -1,4 +1,4 @@
-import { TransactionRequest } from 'fuels';
+import { Operation, TransactionRequest } from 'fuels';
 import { IAssetTransaction, ITransferAsset } from '../../assets';
 
 export enum SortOption {
@@ -78,6 +78,7 @@ export interface ITransactionSummary {
   origin: string;
   name: string;
   image?: string;
+  operations?: Operation[];
 }
 
 export interface ITransaction extends ICreateTransactionPayload {
