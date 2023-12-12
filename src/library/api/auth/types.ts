@@ -1,9 +1,5 @@
-import { FuelWalletLocked } from '@fuel-wallet/sdk';
-
 export interface IAuthService {
-  createSession: () => Promise<IBSAFEAuth | undefined>;
-  signerByPk: (pk: string) => Promise<void>;
-  signerByAccount: (wallet: FuelWalletLocked) => Promise<void>;
+  refresh: () => Promise<void>;
 }
 
 export interface IApiConfig {
@@ -24,4 +20,7 @@ export interface IBSAFEAuthPayload {
   provider: string;
   encoder: string;
   user_id: string;
+  BSAFEAuth: IBSAFEAuth;
+  type: 'pk' | 'account';
+  sn: string;
 }

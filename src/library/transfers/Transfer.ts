@@ -2,6 +2,7 @@ import {
   bn,
   hashTransaction,
   hexlify,
+  Provider,
   ScriptTransactionRequest,
   TransactionRequest,
   transactionRequestify,
@@ -24,7 +25,6 @@ import {
   Vault,
 } from '../';
 import { delay } from '../../test-utils';
-import { defaultConfigurable } from '../../configurables';
 import { BSAFEScriptTransaction } from './ScriptTransaction';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -290,9 +290,10 @@ export class Transfer {
   }: IFormatTransfer & { vault: Vault }) {
     const outputs = await Asset.assetsGroupByTo(assets);
     const coins = await Asset.assetsGroupById(assets);
+    const fee = (await Provider.create(vault.provider.url)).getGasConfig();
     const transactionCoins = await Asset.addTransactionFee(
       coins,
-      defaultConfigurable['gasPrice'],
+      fee.maxGasPerPredicate,
     );
 
     // await this.validateBalance(coins, vault).catch((error) => {
@@ -355,9 +356,6 @@ export class Transfer {
         await this.service.send(this.BSAFETransactionId);
         break;
 
-      case TransactionStatus.PROCESS_ON_CHAIN:
-        return await this.wait();
-
       case TransactionStatus.FAILED || TransactionStatus.SUCCESS:
         break;
 
@@ -396,9 +394,6 @@ export class Transfer {
       transaction = await this.service.findByTransactionID(
         this.BSAFETransactionId,
       );
-
-      if (transaction.status == TransactionStatus.PENDING_SENDER)
-        await this.send();
 
       if (transaction.status == TransactionStatus.PROCESS_ON_CHAIN)
         await this.service.verify(this.BSAFETransactionId);
