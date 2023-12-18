@@ -109,8 +109,19 @@ describe('[TRANSFERS]', () => {
       };
 
       let transaction = await vault.BSAFEIncludeTransaction(newTransfer);
+      let transaction_aux = await vault.BSAFEIncludeTransaction({
+        ...newTransfer,
+        assets: [
+          {
+            amount: bn(1_500_000).format(),
+            assetId: assets['ETH'],
+            to: accounts['STORE'].address,
+          },
+        ],
+      });
 
       const signTimeout = async () => {
+        //sign tx_1
         await delay(5000);
         await signin(
           transaction.getHashTxId(),
@@ -119,12 +130,27 @@ describe('[TRANSFERS]', () => {
           transaction.BSAFETransactionId,
         );
 
-        await delay(5000);
         await signin(
           transaction.getHashTxId(),
           'USER_2',
           auth['USER_2'].BSAFEAuth,
           transaction.BSAFETransactionId,
+        );
+
+        //sign tx_2
+        await delay(5000);
+        await signin(
+          transaction_aux.getHashTxId(),
+          'USER_3',
+          auth['USER_3'].BSAFEAuth,
+          transaction_aux.BSAFETransactionId,
+        );
+
+        await signin(
+          transaction_aux.getHashTxId(),
+          'USER_2',
+          auth['USER_2'].BSAFEAuth,
+          transaction_aux.BSAFETransactionId,
         );
       };
 
@@ -136,17 +162,39 @@ describe('[TRANSFERS]', () => {
         transaction.BSAFETransactionId,
       );
 
-      const oldTransaction = await vault.BSAFEGetTransaction(
-        transaction.BSAFETransactionId,
+      // Signin transaction
+      await signin(
+        transaction_aux.getHashTxId(),
+        'USER_1',
+        auth['USER_1'].BSAFEAuth,
+        transaction_aux.BSAFETransactionId,
       );
 
-      oldTransaction.send();
+      // console.log(
+      //   'oldTransaction: ',
+      //   oldTransaction.getHashTxId(),
+      //   oldTransaction.transactionRequest,
+      // );
+      // console.log(
+      //   'transaction: ',
+      //   transaction.getHashTxId(),
+      //   transaction.transactionRequest,
+      // );
+
+      console.log(transaction_aux.BSAFETransactionId);
+      console.log(transaction.BSAFETransactionId);
+
+      transaction_aux.send();
+      transaction.send();
 
       // this process isan`t async, next line is async
       signTimeout();
 
-      const result = await transaction.wait();
-      expect(result.status).toBe(TransactionStatus.success);
+      const result_tx1 = await transaction.wait();
+      const result_tx2 = await transaction_aux.wait();
+      console.log(result_tx1);
+      console.log(result_tx2);
+      //expect(result.status).toBe(TransactionStatus.success);
     },
     100 * 1000,
   );

@@ -402,6 +402,12 @@ export class Transfer {
 
       if (transaction.status == TransactionStatus.PROCESS_ON_CHAIN)
         await this.service.verify(this.BSAFETransactionId);
+
+      if (
+        transaction.status == TransactionStatus.SUCCESS ||
+        transaction.status == TransactionStatus.FAILED
+      )
+        break;
     }
 
     const result: ITransactionResume = {
