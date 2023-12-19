@@ -14,13 +14,15 @@ export const authService = async (
   const result: { [key: string]: IAuthAccount } = {};
   for await (const acc of _accounts) {
     const account: IDefaultAccount = accounts[acc];
-    const auth = await AuthService.create(account.address, provider);
-    await auth.signerByPk(account.privateKey!);
-    await auth.createSession();
+    const auth = await AuthService.createByPk(
+      account.address,
+      provider,
+      account.privateKey!,
+    );
 
     result[acc] = {
       ...account,
-      BSAFEAuth: auth.BSAFEAuth!,
+      BSAFEAuth: auth?.BSAFEAuth!,
     };
   }
 
