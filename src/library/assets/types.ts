@@ -10,6 +10,7 @@ export type ITransferAsset = {
   assetId: string;
   amount: string;
   to: string;
+  recipientNickname: string;
 };
 
 export interface IAssetTransaction extends ITransferAsset {
