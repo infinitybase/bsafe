@@ -35,7 +35,6 @@ export class Vault extends Predicate<[]> implements IVault {
   private configurable: IConfVault;
 
   public name!: string;
-  public provider: Provider;
   public BSAFEVault!: IPredicate;
   public BSAFEVaultId!: string;
   public description?: string;

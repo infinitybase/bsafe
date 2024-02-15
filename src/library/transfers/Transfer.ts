@@ -1,6 +1,5 @@
 import {
   bn,
-  hashTransaction,
   hexlify,
   ScriptTransactionRequest,
   TransactionRequest,
@@ -78,7 +77,7 @@ export class Transfer {
     isSave,
   }: TransferFactory) {
     const getHashTxId = (script: TransactionRequestLike, chainId: number) => {
-      const txHash = hashTransaction(transactionRequestify(script), chainId);
+      const txHash = transactionRequestify(script).getTransactionId(chainId);
       return txHash.slice(2);
     };
 
@@ -253,8 +252,7 @@ export class Transfer {
    * @returns Hash of this transaction
    */
   public getHashTxId() {
-    const txHash = hashTransaction(
-      this.transactionRequest,
+    const txHash = this.transactionRequest.getTransactionId(
       this.vault.provider.getChainId(),
     );
     return txHash.slice(2);

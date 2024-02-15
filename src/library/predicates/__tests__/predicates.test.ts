@@ -19,7 +19,7 @@ describe('[PREDICATES]', () => {
 
   beforeAll(async () => {
     provider = await Provider.create(defaultConfigurable['provider']);
-    chainId = await provider.getChainId();
+    chainId = provider.getChainId();
     auth = await authService(
       ['USER_1', 'USER_2', 'USER_3', 'USER_5', 'USER_4'],
       provider.url,
@@ -65,7 +65,7 @@ describe('[PREDICATES]', () => {
   });
 
   test('Created an valid vault', async () => {
-    const vault = await newVault(signers, provider, auth['USER_1'].BSAFEAuth);
+    const vault = await newVault(signers, provider);
     await sendPredicateCoins(vault, bn(1_000_000), 'sETH', rootWallet);
     await sendPredicateCoins(vault, bn(1_000_000), 'ETH', rootWallet);
 

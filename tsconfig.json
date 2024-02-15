@@ -1,20 +1,18 @@
 {
+    "extends": "@fuels/ts-config/base.json",
     "compilerOptions": {
-        "allowSyntheticDefaultImports": true,
-        "declaration": true,
-        "esModuleInterop": true,
-        "jsx": "react",
-        "lib": ["es5", "es2015", "es2016", "dom", "esnext"],
-        "types": ["node", "jest"],
-        "module": "es2015",
-        "moduleResolution": "node",
-        "noImplicitAny": true,
-        "noUnusedLocals": true,
-        "outDir": "dist/esm",
-        "sourceMap": true,
-        "strict": true,
-        "target": "es6"
+        "keyofStringsOnly": true,
+        "ignoreDeprecations": "5.0",
+        "resolveJsonModule": true,
+        "outDir": "./dist",
+        "baseUrl": ".",
+        "rootDir": "."
     },
-    "include": ["src/**/*.ts", "src/**/*.tsx"],
-    "exclude": ["node_modules", "src/library/predicates/__tests__/*.ts", "src/mocks/*.json"]
+    "ts-node": {
+        "compilerOptions": {
+            "module": "commonjs"
+        }
+    },
+    "include": ["src/**/*.ts"],
+    "exclude": ["**/*.test.ts", "dist"]
 }

@@ -7,6 +7,7 @@ import { Asset } from '@fuel-wallet/types';
 import { defaultConfigurable } from '../../configurables';
 import { BSAFEConnectorEvents } from './types';
 import { DAppWindow } from './DAPPWindow';
+
 const URL = defaultConfigurable['api_url'];
 
 type FuelABI = JsonAbi;

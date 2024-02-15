@@ -11,13 +11,13 @@ export const defaultConfigurable = {
   // stg
   //api_url: 'https://stg-api.bsafe.pro',
   //bsafe_url: 'https://bsafe-ui-git-staging-infinity-base.vercel.app/',
-  provider: 'https://beta-4.fuel.network/graphql',
+  provider: 'http://localhost:4000/graphql',
   //prd
-  api_url: 'https://api-multsig.infinitybase.com',
+  api_url: 'http://localhost:3333',
   bsafe_url: 'https://app.bsafe.pro/',
   encoder: 'fuel',
-  gasPrice: bn(100),
-  gasLimit: bn(100000),
+  gasPrice: bn(1),
+  gasLimit: bn(1_000_000),
   chainId: 0,
   refetchTimeout: 1000,
 };

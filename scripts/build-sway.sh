@@ -10,7 +10,7 @@ rm -rf "$DIR/dist"
 cd "$DIR"
 
 # Instala dependencias
-yarn install
+pnpm install
 
 # Executa o comando do package.json
-yarn run build:sway
+pnpm run build:sway

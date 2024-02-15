@@ -7,7 +7,7 @@
     "default": "./dist/index.mjs"
   },
   "scripts": {
-    "build:sway": "rm -rf dist/ && rm -rf node_modules && yarn && node build.js"
+    "build:sway": "rm -rf dist/ && rm -rf node_modules && pnpm i && node build.js"
   },
   "dependencies": {
     "fuels": "^0.43.1"

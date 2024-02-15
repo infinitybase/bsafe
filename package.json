@@ -4,29 +4,37 @@
   "description": "A signature validation package built based on sway in the fuel network",
   "author": "InfinityBase - Guilherme Roque",
   "license": "Apache-2.0",
-  "main": "dist/cjs/index.js",
-  "module": "dist/esm/index.js",
+  "main": "dist/index.js",
+  "module": "dist/index.mjs",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "require": "./dist/index.js",
+      "import": "./dist/index.mjs",
+      "types": "./dist/index.d.ts"
+    }
+  },
   "files": [
     "dist"
   ],
   "scripts": {
-    "build": "yarn build:sway && rm -rf dist/ && prettier --write src/ && yarn build:esm && yarn build:cjs && yarn build:version",
-    "build:esm": "tsc",
-    "build:cjs": "tsc --module CommonJS --outDir dist/cjs",
+    "build": "pnpm build:sway && rm -rf dist/ && prettier --write src/ && pnpm build:package && yarn build:version",
+    "build:package": "tsup",
     "build:sway": "chmod +x ./scripts/build-sway.sh && ./scripts/build-sway.sh",
     "build:version": "chmod +x ./scripts/update-version.sh && ./scripts/update-version.sh",
     "test": "node --experimental-vm-modules ./node_modules/jest/bin/jest.js --runInBand --detectOpenHandles --forceExit --verbose",
     "chain:start": "make -C ./docker/chain start",
     "chain:stop": "make -C ./docker/chain stop",
     "chain:clean": "make -C ./docker/chain clean",
-    "chain:restart": "make -C ./docker/chain restart",
-    "postinstall": "patch-package --use-yarn"
+    "chain:restart": "make -C ./docker/chain restart"
   },
   "resolutions": {
     "wrap-ansi": "7.0.0",
     "string-width": "4.1.0"
   },
   "devDependencies": {
+    "@fuel-wallet/types": "0.13.10",
+    "@fuels/ts-config": "^0.15.1",
     "@types/elliptic": "^6.4.14",
     "@types/jest": "^29.5.4",
     "@types/node": "^16.18.11",
@@ -34,26 +42,28 @@
     "prettier": "3.0.3",
     "ts-jest": "^29.1.1",
     "ts-node": "^10.9.1",
+    "tsup": "^7.2.0",
     "typescript": "^4.9.4"
   },
   "peerDependencies": {
     "@fuel-wallet/react": "0.14.0-preview-a651bbe",
-    "fuels": "0.67.0",
+    "fuels": "0.73.0",
     "socket.io": "^4.7.2",
     "socket.io-client": "^4.7.2",
     "uuid": "^9.0.1"
   },
   "dependencies": {
+    "@fuel-ts/providers": "^0.73.0",
     "@fuel-wallet/react": "0.14.0-preview-a651bbe",
+    "@fuel-wallet/sdk": "^0.13.10",
     "@types/mocha": "^10.0.1",
     "@types/uuid": "^9.0.6",
     "axios": "^1.5.1",
     "elliptic": "^6.5.4",
-    "fuels": "0.67.0",
+    "fuels": "0.73.0",
     "patch-package": "8.0.0",
     "socket.io": "^4.7.2",
     "socket.io-client": "^4.7.2",
-    "tsup": "^7.2.0",
     "uuid": "^9.0.1"
   }
 }

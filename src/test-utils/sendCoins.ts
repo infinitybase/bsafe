@@ -14,11 +14,16 @@ export const sendPredicateCoins = async (
   asset: 'ETH' | 'DAI' | 'sETH',
   rootWallet: WalletUnlocked,
 ) => {
+  const { provider } = predicate;
+  const { gasPriceFactor, minGasPrice } = provider.getGasConfig();
   const deposit = await rootWallet.transfer(
     predicate.address,
     amount,
     assets[asset],
-    txParams,
+    {
+      gasPrice: minGasPrice,
+      gasLimit: gasPriceFactor,
+    },
   );
   await deposit.wait();
 };
