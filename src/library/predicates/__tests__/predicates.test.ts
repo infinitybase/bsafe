@@ -65,7 +65,7 @@ describe('[PREDICATES]', () => {
   });
 
   test('Created an valid vault', async () => {
-    const vault = await newVault(signers, provider);
+    const vault = await newVault(signers, provider, auth['USER_1'].BSAFEAuth);
     await sendPredicateCoins(vault, bn(1_000_000), 'sETH', rootWallet);
     await sendPredicateCoins(vault, bn(1_000_000), 'ETH', rootWallet);
 
