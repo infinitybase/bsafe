@@ -26,7 +26,6 @@ describe('[TRANSFERS]', () => {
   });
 
   beforeAll(async () => {
-    console.log(defaultConfigurable);
     provider = await Provider.create(defaultConfigurable['provider']);
     chainId = await provider.getChainId();
     auth = await authService(
