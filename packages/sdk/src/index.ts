@@ -1,10 +1,2 @@
+export * from './scripts';
 export * from './predicates';
-export * from './transfers';
-export * from './vault';
-export * from './assets';
-export * from './api/auth';
-export * from './api/transactions/types';
-export * from './api/predicates/types';
-export { IDefaultAccount, accounts } from '../test/mocks';
-export { BSafe, defaultConfig } from '../configurables';
-export * from '../../connector';
