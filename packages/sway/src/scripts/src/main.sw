@@ -14,6 +14,10 @@ enum Outputs {
    asset_id: b256,
 }
 
+enum Policy {
+   gas_price: u64,
+   max_fee: u64,
+}
 
 enum TxData {
    tx_type: u8,
