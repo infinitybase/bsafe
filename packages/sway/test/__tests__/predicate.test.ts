@@ -16,12 +16,14 @@ import {
   arrayify,
   bn,
   hexlify,
+  toBytes,
 } from 'fuels';
 
 import { PredicateAbi__factory } from '../../../sdk/src/predicates';
+import { ScriptAbi__factory } from '../../../sdk/src/scripts';
 
 const { PROVIDER, PRIVATE_KEY, GAS_LIMIT, GAS_PRICE } = process.env;
-
+const random_address = Address.fromRandom().toB256();
 async function seedAccount(
   address: AbstractAddress,
   amount: BN,
@@ -93,6 +95,8 @@ async function createTransaction(predicate: Predicate<InputValue[]>) {
     }
   });
 
+  tx.script = arrayify(ScriptAbi__factory.bin);
+  tx.scriptData = toBytes(random_address);
   return tx;
 }
 
@@ -130,8 +134,11 @@ describe('[SWAY_PREDICATE]', () => {
     const response = await sendTransaction(provider, tx, [
       await signTransaction(wallet, tx, provider),
     ]);
+
     const result = await response.waitForResult();
     console.log(result.status);
+    console.log(result.receipts);
+    console.log(random_address);
 
     expect(result.status).toBe('success');
   });
