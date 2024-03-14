@@ -22,7 +22,7 @@
   },
   "scripts": {
     "prebuild": "yarn fuels build",
-    "test": "jest --verbose"
+    "test": "jest --verbose --watchAll"
   },
   "devDependencies": {
     "dotenv": "^16.4.1",
