@@ -17,7 +17,6 @@ export interface TransferConstructor {
   service?: ITransactionService;
   witnesses: string[];
   transactionRequest: TransactionRequest;
-  BakoSafeScript: ScriptTransactionRequest;
   BakoSafeTransaction?: ITransaction;
   BakoSafeTransactionId?: string;
   vault: Vault;

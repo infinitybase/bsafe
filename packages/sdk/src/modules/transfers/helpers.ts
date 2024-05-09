@@ -5,7 +5,7 @@ import {
   hashMessage,
   transactionRequestify,
   bn,
-  ScriptTransactionRequest,
+  Provider,
 } from 'fuels';
 import { defaultValues } from '../vault/helpers';
 import { ITransaction, TransactionService, TransactionStatus } from '../../api';
@@ -161,7 +161,6 @@ export const isOldTransaction = async ({
       vault,
       service,
       name: transaction.name!,
-      BakoSafeScript: scriptTransactionRequest,
       transactionRequest: transactionRequestify(scriptTransactionRequest),
       witnesses: transaction.witnesses.map((witness) => witness.account),
       BakoSafeTransactionId: transaction.id,
@@ -186,65 +185,74 @@ export const isNewTransactionByScript = async ({
   vault,
   isSave,
 }: TransferFactory) => {
-  const isScript =
-    transfer &&
-    Object.entries(transfer).length > 3 &&
-    typeof transfer != 'string' &&
-    'type' in transfer;
+  try {
+    const isScript =
+      transfer &&
+      Object.entries(transfer).length > 3 &&
+      typeof transfer != 'string' &&
+      'type' in transfer;
 
-  const transactionName = `tx_${uuidv4()}`;
-  const service = auth && new TransactionService(auth);
+    const transactionName = `tx_${uuidv4()}`;
+    const service = auth && new TransactionService(auth);
 
-  if (isScript) {
-    vault.populateTransactionPredicateData(transfer);
-    const txData = transactionRequestify(transfer);
-    const hashTxId = getHashTxId(txData, vault.provider.getChainId());
-    const assets = txData.getCoinOutputs().map((coin) => ({
-      assetId: coin.assetId.toString(),
-      to: coin.to.toString(),
-      amount: bn(coin.amount).format().toString(),
-    }));
+    if (isScript) {
+      vault.populateTransactionPredicateData(transfer);
+      const txData = transactionRequestify(transfer);
+      const hashTxId = getHashTxId(txData, vault.provider.getChainId());
+      const assets = txData.getCoinOutputs().map((coin) => ({
+        assetId: coin.assetId.toString(),
+        to: coin.to.toString(),
+        amount: bn(coin.amount).format().toString(),
+      }));
 
-    let transaction: ITransaction | undefined = undefined;
-    if (auth && service && isSave) {
-      transaction = await service.create({
-        assets,
-        hash: hashTxId,
-        txData: txData,
+      const provider = await Provider.create(vault.provider.url);
+
+      const fee = await provider.getTransactionCost(txData);
+      txData.maxFee = fee.maxFee;
+
+      let transaction: ITransaction | undefined = undefined;
+      if (auth && service && isSave) {
+        transaction = await service.create({
+          assets,
+          hash: hashTxId,
+          txData: txData,
+          name: transactionName,
+          status: TransactionStatus.AWAIT_REQUIREMENTS,
+          predicateAddress: vault.address.toString(),
+        });
+      }
+
+      const witnesses =
+        transaction && transaction.witnesses
+          ? transaction.witnesses
+              .map((witness) => witness.signature)
+              .filter((signature) => !!signature)
+          : [];
+
+      const data = {
+        vault,
+        service,
+        witnesses: witnesses,
         name: transactionName,
-        status: TransactionStatus.AWAIT_REQUIREMENTS,
-        predicateAddress: vault.address.toString(),
-      });
+        transactionRequest: txData,
+        BakoSafeTransaction: transaction,
+        BakoSafeTransactionId: transaction?.id,
+      };
+
+      return {
+        is: isScript,
+        data,
+      };
     }
-
-    const witnesses =
-      transaction && transaction.witnesses
-        ? transaction.witnesses
-            .map((witness) => witness.signature)
-            .filter((signature) => !!signature)
-        : [];
-
-    const data = {
-      vault,
-      service,
-      witnesses: witnesses,
-      name: transactionName,
-      transactionRequest: txData,
-      BakoSafeScript: new ScriptTransactionRequest(),
-      BakoSafeTransaction: transaction,
-      BakoSafeTransactionId: transaction?.id,
-    };
 
     return {
       is: isScript,
-      data,
+      data: undefined,
     };
+  } catch (e: any) {
+    console.log('[CREATION_ERROR]', e);
+    throw new Error(e.message);
   }
-
-  return {
-    is: isScript,
-    data: undefined,
-  };
 };
 
 export const identifyCreateTransactionParams = async (

@@ -1,0 +1,7 @@
+[project]
+authors = ["Fuel Labs <contact@fuel.sh>", "guilherme roque"]
+entry = "main.sw"
+license = "Apache-2.0"
+name = "my_counter_project"
+
+[dependencies]

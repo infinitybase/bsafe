@@ -26,7 +26,6 @@ import { identifyCreateTransactionParams } from './helpers';
 export class Transfer {
   public name!: string;
   public witnesses: string[];
-  public BakoSafeScript: ScriptTransactionRequest;
   public BakoSafeTransaction!: ITransaction;
   public transactionRequest: TransactionRequest;
   public BakoSafeTransactionId!: string;
@@ -38,7 +37,6 @@ export class Transfer {
     vault,
     name,
     transactionRequest,
-    BakoSafeScript,
     service,
     BakoSafeTransaction,
     BakoSafeTransactionId,
@@ -47,7 +45,6 @@ export class Transfer {
     this.vault = vault;
     this.service = service;
     this.witnesses = [];
-    this.BakoSafeScript = BakoSafeScript;
     this.transactionRequest = transactionRequest;
     this.BakoSafeTransaction = BakoSafeTransaction!;
     this.BakoSafeTransactionId = BakoSafeTransactionId!;
@@ -77,8 +74,10 @@ export class Transfer {
       }
       case ECreationTransactiontype.IS_SCRIPT: {
         const { payload } = item;
+        console.log('[IS_SCRIPT]', payload);
         return new Transfer(payload);
       }
+
       default:
         throw new Error('Invalid param type to create a transfer');
     }
@@ -122,12 +121,14 @@ export class Transfer {
    */
   public async send(): Promise<ITransactionResume | TransactionResponse> {
     if (!this.service) {
-      const tx: TransactionRequest = transactionRequestify(
-        this.BakoSafeScript!,
-      );
+      const tx: TransactionRequest = this.transactionRequest;
       tx.witnesses = this.witnesses;
+      console.log('[TX_SEND]: ', tx.witnesses);
 
       const tx_est = await this.vault.provider.estimatePredicates(tx);
+
+      console.log('[TX_EST]: ', tx_est);
+
       const encodedTransaction = hexlify(tx_est.toTransactionBytes());
       const {
         submit: { id: transactionId },
