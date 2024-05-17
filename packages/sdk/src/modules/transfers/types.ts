@@ -1,8 +1,4 @@
-import {
-  ScriptTransactionRequest,
-  TransactionRequest,
-  TransactionRequestLike,
-} from 'fuels';
+import { TransactionRequest, TransactionRequestLike } from 'fuels';
 import { ITransferAsset } from '../../utils/assets/types';
 import {
   ITransaction,
