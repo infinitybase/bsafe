@@ -19,7 +19,7 @@
   "license": "Apache-2.0",
   "scripts": {
     "prebuild": "yarn fuels build",
-    "test": "node --experimental-vm-modules ./node_modules/jest/bin/jest.js --runInBand --silent"
+    "test": "node --experimental-vm-modules ./node_modules/jest/bin/jest.js --runInBand"
   },
   "devDependencies": {
     "dotenv": "^16.4.1",

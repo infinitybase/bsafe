@@ -19,6 +19,7 @@ import {
 } from 'fuels';
 
 import { PredicateAbi__factory } from '../../../sdk/src/sway/predicates';
+import { ScriptAbi__factory } from '../../../sdk/src/sway/scripts/';
 import { BakoSafe } from '../../../sdk/configurables';
 
 import { PRIVATE_KEY, GAS_LIMIT, GAS_PRICE } from '../constants';
@@ -84,6 +85,37 @@ async function createTransaction(predicate: Predicate<InputValue[]>) {
       },
     ]);
     tx.addResources(coins);
+
+    tx.inputs?.forEach((input) => {
+      if (
+        input.type === InputType.Coin &&
+        hexlify(input.owner) === predicate.address.toB256()
+      ) {
+        input.predicate = arrayify(predicate.bytes);
+      }
+    });
+
+    return tx;
+  } catch (e) {
+    throw new Error(e.response.errors[0].message ?? 'Create Transaction Error');
+  }
+}
+
+async function createTransactionWithScriptCall(
+  predicate: Predicate<InputValue[]>,
+) {
+  try {
+    const tx = new ScriptTransactionRequest();
+    tx.gasPrice = bn(GAS_LIMIT);
+    tx.gasLimit = bn(GAS_LIMIT);
+    const coins = await predicate.getResourcesToSpend([
+      {
+        amount: bn(100),
+        assetId: BaseAssetId,
+      },
+    ]);
+    tx.addResources(coins);
+    tx.script = arrayify(ScriptAbi__factory.bin);
 
     tx.inputs?.forEach((input) => {
       if (
@@ -210,5 +242,39 @@ describe('[SWAY_PREDICATE]', () => {
         'PredicateVerificationFailed(Panic(PredicateReturnedNonOne))',
       );
     });
+  });
+
+  test('Send transfer by predicate with duplicated signers', async () => {
+    const wallet = Wallet.generate({
+      provider,
+    });
+
+    const predicate = PredicateAbi__factory.createInstance(provider, {
+      SIGNATURES_COUNT: 1,
+      SIGNERS: [
+        wallet.address.toB256(),
+        ZeroBytes32,
+        ZeroBytes32,
+        ZeroBytes32,
+        ZeroBytes32,
+        ZeroBytes32,
+        ZeroBytes32,
+        ZeroBytes32,
+        ZeroBytes32,
+        ZeroBytes32,
+      ],
+      HASH_PREDICATE: Address.fromRandom().toB256(),
+    });
+
+    await seedAccount(predicate.address, bn.parseUnits('0.1'), provider);
+
+    const tx = await createTransaction(predicate);
+
+    const res = await sendTransaction(provider, tx, [
+      await signTransaction(wallet, tx, provider),
+      await signTransaction(wallet, tx, provider),
+    ]);
+
+    await res.wait();
   });
 });
