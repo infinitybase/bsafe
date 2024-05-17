@@ -1,4 +1,4 @@
-import { SortOption } from '../transactions';
+import { SortOptionTx } from '../transactions';
 
 export interface IPagination<T> {
   currentPage: number;
@@ -19,5 +19,5 @@ export const defaultListParams = {
   perPage: 10,
   page: 0,
   orderBy: 'createdAt',
-  sort: SortOption.DESC,
+  sort: SortOptionTx.DESC,
 };

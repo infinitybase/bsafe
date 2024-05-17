@@ -2,13 +2,14 @@ import { Address, B256Address, Provider, ZeroBytes32 } from 'fuels';
 import {
   ECreationtype,
   IBakoSafeApi,
-  IConfVault,
   ICreation,
   ICreationPayload,
   IPayloadVault,
 } from './types';
 import { PredicateService } from '../../api/predicates';
 import { BakoSafe } from '../../../configurables';
+import { Vault } from './Vault';
+import { validations } from './validations';
 
 export const defaultValues: { [name: string]: string } = {
   signature:
@@ -54,8 +55,8 @@ export const instanceByOldUtil = async (
     provider: await Provider.create(result.provider),
     name: result.name,
     description: result.description,
-    abi: result.abi,
-    bytecode: result.bytes,
+    abi: result.version.abi,
+    bytecode: result.version.bytes,
     BakoSafeAuth: {
       address,
       token,
@@ -63,6 +64,7 @@ export const instanceByOldUtil = async (
     BakoSafeVaultId: result.id,
     BakoSafeVault: result,
     api,
+    version: result.version.code,
   };
 };
 
@@ -81,14 +83,26 @@ export const instanceByNewUtil = async (
   const provider = await Provider.create(
     params.configurable.network ?? BakoSafe.getProviders('CHAIN_URL'),
   );
+  const hasVersion = !!params.version;
+  const { code, abi, bytes } = hasVersion
+    ? await Vault.BakoSafeGetPredicateVersionByCode(params.version!)
+        .then((data) => data)
+        .catch(() => {
+          throw new Error('Invalid predicate version');
+        })
+    : await Vault.BakoSafeGetCurrentPredicateVersion();
   return {
     ...params,
     api,
     configurable: {
       ...params.configurable,
       chainId: await provider.getChainId(),
+      network: params.configurable.network,
     },
     provider,
+    abi,
+    bytecode: bytes,
+    version: code,
   };
 };
 
@@ -113,31 +127,10 @@ export const isNewPredicate = async (
   data: ICreationPayload | undefined;
 }> => {
   const is = 'configurable' in param;
-  is && validations(param.configurable);
   return {
     is,
     data: is ? await instanceByNewUtil(param) : undefined,
   };
-};
-
-export const validations = (configurable: Omit<IConfVault, 'chainId'>) => {
-  const { SIGNATURES_COUNT, SIGNERS } = configurable;
-  const _SIGNERS = SIGNERS.filter((value) => value !== ZeroBytes32);
-
-  if (!SIGNATURES_COUNT || Number(SIGNATURES_COUNT) == 0) {
-    throw new Error('SIGNATURES_COUNT is required must be granter than zero');
-  }
-  if (!_SIGNERS || _SIGNERS.length === 0) {
-    throw new Error('SIGNERS must be greater than zero');
-  }
-  if (_SIGNERS.length < Number(SIGNATURES_COUNT)) {
-    throw new Error('Required Signers must be less than signers');
-  }
-
-  const unique = new Set(_SIGNERS);
-  if (unique.size !== _SIGNERS.length) {
-    throw new Error('SIGNERS must be unique');
-  }
 };
 
 export const identifyCreateVaultParams = async (
@@ -146,6 +139,10 @@ export const identifyCreateVaultParams = async (
   try {
     const { data: oldData, is: isOld } = await isOldPredicate(param);
     const { data: newData } = await isNewPredicate(param);
+
+    const abi = isOld ? oldData?.abi : newData?.abi;
+    const configurable = isOld ? oldData?.configurable : newData?.configurable;
+    validations(configurable!, abi!);
 
     if (isOld && !!oldData) {
       return {

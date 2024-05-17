@@ -1,7 +1,7 @@
 import { Operation, TransactionRequest } from 'fuels';
 import { ITransferAsset } from '../../utils/assets';
 
-export enum SortOption {
+export enum SortOptionTx {
   ASC = 'ASC',
   DESC = 'DESC',
 }
@@ -49,7 +49,7 @@ export interface GetTransactionParams {
   perPage?: number;
   page?: number;
   orderBy?: string;
-  sort?: SortOption;
+  sort?: SortOptionTx;
 }
 
 export enum TransactionProcessStatus {

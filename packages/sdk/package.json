@@ -1,6 +1,6 @@
 {
   "name": "bakosafe",
-  "version": "0.0.51",
+  "version": "0.0.54",
   "description": "A signature validation package built based on sway in the fuel network",
   "main": "dist/index.js",
   "module": "dist/index.mjs",
@@ -48,5 +48,8 @@
     "axios": "^1.5.1",
     "fuels": "0.76.12",
     "uuid": "^9.0.1"
+  },
+  "peerDependencies": {
+    "fuels": "0.76.12"
   }
 }
