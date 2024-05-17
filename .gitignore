@@ -5,6 +5,6 @@
 .idea
 .DS_Store
 .turbo
-**/predicates
-**/contracts
-**/scripts
+**/sway/predicates/**
+**/sway/contracts/**
+**/sway/scripts/**
