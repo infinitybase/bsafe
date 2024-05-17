@@ -1,10 +1,14 @@
 import { Api } from '../api';
 import { IBakoSafeAuth } from '../auth/types';
 import { GetTransactionParams } from '../transactions';
-import { IPredicatePayload, IPredicateService } from './types';
+import {
+  GetPredicateVersionParams,
+  IPredicatePayload,
+  IPredicateService,
+} from './types';
 
 export class PredicateService extends Api implements IPredicateService {
-  constructor(auth: IBakoSafeAuth) {
+  constructor(auth?: IBakoSafeAuth) {
     super(auth);
   }
 
@@ -37,6 +41,29 @@ export class PredicateService extends Api implements IPredicateService {
 
   public async listPredicateTransactions(params: GetTransactionParams) {
     const { data } = await this.client.get('/transaction', {
+      params: {
+        ...params,
+      },
+    });
+
+    return data;
+  }
+
+  // Version
+  public async findVersionByCode(predicateVersionCode: string) {
+    const { data } = await this.client.get(
+      `/predicate/version/${predicateVersionCode}`,
+    );
+    return data;
+  }
+
+  public async findCurrentVersion() {
+    const { data } = await this.client.get('/predicate/version/current');
+    return data;
+  }
+
+  public async listVersions(params: GetPredicateVersionParams) {
+    const { data } = await this.client.get('/predicate/version', {
       params: {
         ...params,
       },

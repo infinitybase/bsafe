@@ -2,11 +2,14 @@ import { arrayify, Predicate } from 'fuels';
 
 import {
   defaultListParams,
+  GetPredicateVersionParams,
   IBakoSafeAuth,
   IListTransactions,
   IPagination,
   IPredicate,
   IPredicateService,
+  IPredicateVersion,
+  PredicateService,
 } from '../../api';
 import {
   ECreationtype,
@@ -26,7 +29,6 @@ import {
 import { Transfer } from '../transfers';
 import { v4 as uuidv4 } from 'uuid';
 import { AddressUtils } from '../../utils/address/Address';
-import { PredicateAbi__factory } from '../../sway/predicates';
 
 /**
  * `Vault` are extension of predicates, to manager transactions, and sends.
@@ -46,12 +48,13 @@ export class Vault extends Predicate<[]> implements IVault {
   public BakoSafeVaultId!: string;
   public description?: string;
   public transactionRecursiveTimeout: number;
+  public version?: string;
 
   protected constructor({
     configurable,
     provider,
-    abi = PredicateAbi__factory.abi as unknown as string,
-    bytecode = PredicateAbi__factory.bin,
+    abi,
+    bytecode,
     name,
     description,
     BakoSafeVaultId,
@@ -59,6 +62,7 @@ export class Vault extends Predicate<[]> implements IVault {
     BakoSafeAuth,
     transactionRecursiveTimeout = 1000,
     api,
+    version,
   }: ICreationPayload) {
     const _abi = typeof abi === 'string' ? JSON.parse(abi) : abi;
     const _bin = bytecode;
@@ -82,6 +86,7 @@ export class Vault extends Predicate<[]> implements IVault {
     this.BakoSafeVault = BakoSafeVault!;
     this.auth = BakoSafeAuth!;
     this.api = api!;
+    this.version = version;
   }
 
   /**
@@ -91,10 +96,9 @@ export class Vault extends Predicate<[]> implements IVault {
    *      @param HASH_PREDICATE - Hash to works an unic predicate, is not required, but to instance old predicate is an number array
    *      @param SIGNATURES_COUNT - Number of signatures required of predicate
    *      @param SIGNERS - Array string of predicate signers
-   * @param abi - The JSON abi to BakoSafe multisig.
-   * @param bytecode - The binary code of preficate BakoSafe multisig.
    * @param transactionRecursiveTimeout - The time to refetch transaction on BakoSafe API.
    * @param BakoSafeAuth - The auth to BakoSafe API.
+   * @param version - The identifier of predicate version to BakoSafe API.
    *
    * @returns an instance of Vault
    **/
@@ -142,10 +146,9 @@ export class Vault extends Predicate<[]> implements IVault {
       predicateAddress: this.address.toString(),
       minSigners: this.configurable.SIGNATURES_COUNT,
       addresses: AddressUtils.hex2string(this.configurable.SIGNERS),
-      bytes: this.bin,
-      abi: JSON.stringify(this.abi),
       configurable: JSON.stringify(this.configurable),
       provider: this.provider.url,
+      versionCode: this.version,
     });
     this.BakoSafeVault = {
       ...rest,
@@ -162,10 +165,9 @@ export class Vault extends Predicate<[]> implements IVault {
    */
   private static makePredicate(configurable: IConfVault) {
     return {
-      SIGNATURES_COUNT: configurable.SIGNATURES_COUNT as number,
-      SIGNERS: makeSubscribers(configurable.SIGNERS) as string[],
-      HASH_PREDICATE: (configurable.HASH_PREDICATE ??
-        makeHashPredicate()) as string,
+      SIGNATURES_COUNT: configurable.SIGNATURES_COUNT,
+      SIGNERS: makeSubscribers(configurable.SIGNERS),
+      HASH_PREDICATE: configurable.HASH_PREDICATE ?? makeHashPredicate(),
     };
   }
 
@@ -241,6 +243,75 @@ export class Vault extends Predicate<[]> implements IVault {
       auth: this.auth,
       transfer: transactionId,
     });
+  }
+
+  /**
+   * Return an instance of predicate service
+   *
+   * @returns an instance of predicate service
+   */
+  private static getPredicateServiceInstance(): PredicateService {
+    return new PredicateService();
+  }
+
+  /**
+   * Return the last predicate version created
+   *
+   * @returns details of predicate version
+   */
+  static async BakoSafeGetCurrentPredicateVersion(): Promise<IPredicateVersion> {
+    const api = this.getPredicateServiceInstance();
+    return await api.findCurrentVersion();
+  }
+
+  /**
+   * Return the predicate version that has a given code
+   *
+   * @param code - The predicate version code on BakoSafeApi
+   *
+   * @returns details of predicate version
+   */
+  static async BakoSafeGetPredicateVersionByCode(
+    code: string,
+  ): Promise<IPredicateVersion> {
+    const api = this.getPredicateServiceInstance();
+    return await api.findVersionByCode(code);
+  }
+
+  /**
+   * Return an list of predicate versions
+   *
+   * @param {GetPredicateVersionParams} params - The params to list predicate versions
+   *  - has optional params
+   *  - by default, it returns the first 10 predicate version details
+   *
+   * @returns a paginated list of predicate version details
+   */
+  static async BakoSafeGetPredicateVersions(
+    params?: GetPredicateVersionParams,
+  ): Promise<IPagination<Partial<IPredicateVersion>>> {
+    const _params = {
+      page: 0,
+      perPage: 10,
+    };
+    const api = this.getPredicateServiceInstance();
+    const predicateVersions = await api
+      .listVersions(params ?? _params)
+      .then((data) => {
+        return {
+          ...data,
+          data: data.data.map((version: IPredicateVersion) => {
+            return {
+              name: version.name,
+              description: version.description,
+              code: version.code,
+              abi: version.abi,
+            };
+          }),
+        };
+      });
+
+    return predicateVersions;
   }
 
   /**
