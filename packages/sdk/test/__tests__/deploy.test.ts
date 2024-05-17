@@ -5,7 +5,7 @@ import { IUserAuth, authService, newVault, signin } from '../utils';
 import path from 'path';
 import { readFileSync } from 'fs';
 import { BakoContractDeploy } from '../../src/modules/deploy';
-import abi from '../../src/modules/deploy/contract/out/debug/my_counter_project-abi.json';
+import { MyCounterProjectAbi__factory } from '../../src/sway/contracts/factories/MyCounterProjectAbi__factory';
 
 const _path = path.resolve(
   __dirname,
@@ -36,11 +36,11 @@ describe('[PREDICATES]', () => {
       //criando vault
       const vault = await newVault([signers[2]], provider, undefined, 100);
       const bin = readFileSync(_path);
-
+      const _abi = MyCounterProjectAbi__factory.abi;
       //criando contrato
       const contract = new BakoContractDeploy(
         bin,
-        abi,
+        _abi,
         provider,
         vault.address.toString(),
       );
