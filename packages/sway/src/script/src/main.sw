@@ -9,10 +9,6 @@ use std::b512::{B512};
 
 fn main() {
     log("Hello, World!");
-    // /log(tx_witness_data())
-    log(tx_witnesses_count());
-
-
     
 
     let mut i_witnesses = 0;
@@ -22,5 +18,4 @@ fn main() {
         i_witnesses += 1;
     }
 
-    // return true;
 }

@@ -23,5 +23,11 @@ Currently, our predicate contract supports only two types of signatures:
 - Add the desired configurations to the `fuels.config.ts` file:
 
 ```
-yarn fuels build
+pnpm prebuild
+```
+
+## Run tests
+
+```
+pnpm test
 ```
