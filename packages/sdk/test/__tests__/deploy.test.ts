@@ -1,4 +1,12 @@
-import { bn, Provider } from 'fuels';
+import {
+  arrayify,
+  BaseAssetId,
+  bn,
+  hexlify,
+  InputType,
+  Provider,
+  TransactionResponse,
+} from 'fuels';
 import { BakoSafe } from '../../configurables';
 import { accounts } from '../mocks';
 import { IUserAuth, authService, newVault, signin } from '../utils';
@@ -34,7 +42,12 @@ describe('[PREDICATES]', () => {
     'Deploy contract',
     async () => {
       //criando vault
-      const vault = await newVault([signers[2]], provider, undefined, 100);
+      const vault = await newVault(
+        [accounts['USER_3'].address],
+        provider,
+        undefined,
+        10000,
+      );
       const bin = readFileSync(_path);
       const _abi = MyCounterProjectAbi__factory.abi;
       //criando contrato
@@ -47,28 +60,88 @@ describe('[PREDICATES]', () => {
 
       //criar tx do deploy
       const { transactionRequest, contractId } = await contract.deploy();
-      console.log(
-        transactionRequest.witnesses[transactionRequest.bytecodeWitnessIndex],
+      // console.log(
+      //   transactionRequest.witnesses[transactionRequest.bytecodeWitnessIndex],
+      // );
+      // console.log('[CONTRACT_ID]: ', contractId);
+
+      const sig: string = await signin(
+        transactionRequest.getTransactionId(0),
+        'USER_3',
       );
-      console.log('[CONTRACT_ID]: ', contractId);
+
+      //transactionRequest.bytecodeWitnessIndex = 0;
+      transactionRequest.witnesses.push(sig);
+      //transactionRequest.witnessLimit = bn(15);
 
       //adicionar fees
+
       const fee = await provider.getTransactionCost(transactionRequest);
-      transactionRequest.maxFee = fee.maxFee;
-      transactionRequest.gasPrice = bn(10);
+      // console.log('[FEE]: ', fee.maxFee, fee.maxFee.toString());
+      // console.log(
+      //   '[PREDICATE]: ',
+      //   await vault.getBalance(),
+      //   (await vault.getBalance()).toString(),
+      // );
+
+      transactionRequest.maxFee = bn(fee.maxFee).add(bn(1000));
+      transactionRequest.gasPrice = bn(1);
+      // console.log('[PREDICATE]: ', transactionRequest.witnesses);
+      const coins = await vault.getResourcesToSpend([
+        {
+          amount: bn(100),
+          assetId: BaseAssetId,
+        },
+      ]);
+
+      transactionRequest.addResources(coins);
+      transactionRequest.witnesses.pop();
+      //console.log('[COINS]: ', transactionRequest.witnesses);
+      transactionRequest.inputs?.forEach((input) => {
+        if (
+          input.type === InputType.Coin &&
+          hexlify(input.owner) === vault.address.toB256()
+        ) {
+          input.predicate = arrayify(vault.bytes);
+        }
+      });
+
+      console.log('[PREDICATE]: ', {
+        req: transactionRequest.getTransactionId(0),
+      });
+
+      await provider.estimatePredicates(transactionRequest);
+      const encodedTransaction = hexlify(
+        transactionRequest.toTransactionBytes(),
+      );
+
+      console.log('[ENCODED]: ');
+      // console.log('[ENCODED]: ', transactionRequest.witnesses);
+      // console.log('[PREDICATE]: ', vault.address.toString());
+
+      const {
+        submit: { id: transactionId },
+      } = await provider.operations
+        .submit({ encodedTransaction })
+        .then((res) => res)
+        .catch((err) => {
+          console.log('[ERROR]: ', err);
+          throw new Error(err);
+        });
+
+      console.log('[PREDICATE]: ', {
+        req: transactionRequest.getTransactionId(0),
+      });
+
+      const tx = new TransactionResponse(transactionId, provider);
 
       //criar a tx pelo vault
-      const tx = await vault.BakoSafeIncludeTransaction(transactionRequest);
-      const sig: string = await signin(tx.getHashTxId(), 'USER_3');
-      tx.witnesses.push(
-        //@ts-ignore
-        transactionRequest.witnesses[transactionRequest.bytecodeWitnessIndex],
-      );
-      tx.witnesses.push(sig);
 
-      //enviar a tx
-      const tx_send = await tx.send();
-      console.log('[TX_SEND]: ', tx_send);
+      // tx.witnesses.push(sig);
+      // tx.witnesses.push(
+      //   //@ts-ignore
+      //   transactionRequest.witnesses[transactionRequest.bytecodeWitnessIndex],
+      // );
 
       const result = await tx.wait();
 
