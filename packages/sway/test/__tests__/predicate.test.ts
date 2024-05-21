@@ -17,16 +17,12 @@ import {
   bn,
   hexlify,
 } from 'fuels';
-import { dirname, join } from 'path';
-import { readFileSync } from 'fs';
 
 import { PredicateAbi__factory } from '../../../sdk/src/sway/predicates';
-import { MyCounterProjectAbi__factory } from '../../../sdk/src/sway/contracts/factories/MyCounterProjectAbi__factory';
-import { ScriptAbi__factory } from '../../../sdk/src/sway/scripts/';
+
 import { BakoSafe } from '../../../sdk/configurables';
 
 import { PRIVATE_KEY, GAS_LIMIT, GAS_PRICE } from '../constants';
-import { BakoContractDeploy } from '../../../sdk/src/modules/deploy';
 
 async function seedAccount(
   address: AbstractAddress,
@@ -89,37 +85,6 @@ async function createTransaction(predicate: Predicate<InputValue[]>) {
       },
     ]);
     tx.addResources(coins);
-
-    tx.inputs?.forEach((input) => {
-      if (
-        input.type === InputType.Coin &&
-        hexlify(input.owner) === predicate.address.toB256()
-      ) {
-        input.predicate = arrayify(predicate.bytes);
-      }
-    });
-
-    return tx;
-  } catch (e) {
-    throw new Error(e.response.errors[0].message ?? 'Create Transaction Error');
-  }
-}
-
-async function createTransactionWithScriptCall(
-  predicate: Predicate<InputValue[]>,
-) {
-  try {
-    const tx = new ScriptTransactionRequest();
-    tx.gasPrice = bn(GAS_LIMIT);
-    tx.gasLimit = bn(GAS_LIMIT);
-    const coins = await predicate.getResourcesToSpend([
-      {
-        amount: bn(100),
-        assetId: BaseAssetId,
-      },
-    ]);
-    tx.addResources(coins);
-    tx.script = arrayify(ScriptAbi__factory.bin);
 
     tx.inputs?.forEach((input) => {
       if (
@@ -285,99 +250,5 @@ describe('[SWAY_PREDICATE]', () => {
     //   status: r.status,
     //   id: r.id,
     // });
-  });
-
-  test('Send transfer create type', async () => {
-    const wallet = Wallet.generate({
-      provider,
-    });
-
-    const predicate = PredicateAbi__factory.createInstance(provider, {
-      SIGNATURES_COUNT: 0,
-      SIGNERS: [
-        wallet.address.toB256(),
-        ZeroBytes32,
-        ZeroBytes32,
-        ZeroBytes32,
-        ZeroBytes32,
-        ZeroBytes32,
-        ZeroBytes32,
-        ZeroBytes32,
-        ZeroBytes32,
-        ZeroBytes32,
-      ],
-      HASH_PREDICATE: Address.fromRandom().toB256(),
-    });
-
-    await seedAccount(predicate.address, bn.parseUnits('0.1'), provider);
-    const _path = join(
-      __dirname,
-      '../../src/contract/out/debug/my_counter_project.bin',
-    );
-
-    const bin = readFileSync(_path);
-    const _abi = MyCounterProjectAbi__factory.abi;
-    //criando contrato
-    const contract = new BakoContractDeploy(
-      bin,
-      _abi,
-      provider,
-      predicate.address.toString(),
-    );
-
-    const { transactionRequest, contractId } = await contract.deploy();
-
-    const sig: string = await signTransaction(
-      wallet,
-      transactionRequest,
-      provider,
-    );
-
-    transactionRequest.witnesses.push(sig);
-
-    console.log({
-      witnesses: transactionRequest.witnesses,
-    });
-    try {
-      // equal to .found() on wallet class
-      const coins = await predicate.getResourcesToSpend([
-        {
-          amount: bn(1000),
-          assetId: BaseAssetId,
-        },
-      ]);
-      transactionRequest.addResources(coins);
-
-      transactionRequest.inputs?.forEach((input) => {
-        if (
-          input.type === InputType.Coin &&
-          hexlify(input.owner) === predicate.address.toB256()
-        ) {
-          input.predicate = arrayify(predicate.bytes);
-        }
-      });
-
-      // todo: calc exact maxFee and gasPrice
-      transactionRequest.maxFee = bn(10000);
-      transactionRequest.gasPrice = bn(1);
-
-      console.log(transactionRequest.toTransaction());
-
-      await provider.estimatePredicates(transactionRequest);
-      const encodedTransaction = hexlify(
-        transactionRequest.toTransactionBytes(),
-      );
-
-      const {
-        submit: { id: transactionId },
-      } = await provider.operations.submit({ encodedTransaction });
-
-      const response = new TransactionResponse(transactionId, provider);
-      return response;
-    } catch (e) {
-      console.log(e);
-    }
-    // const response = new TransactionResponse(transactionId, provider);
-    // return response;
   });
 });

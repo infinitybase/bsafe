@@ -65,7 +65,8 @@ fn verify_signer_exists(public_key: b256, verified_signatures: Vec::<b256>) -> u
 }
 
 enum Signature {
-  webauth: WebAuthn, // 0
+  Webauth: WebAuthn, // 0
+  Fuel: B512, // 1
 }
 
 
@@ -102,17 +103,19 @@ fn main() -> bool {
     // Recover the public key from the signature
     match sig_ptr.read::<Signature>() {
       // Webauthn signature
-      Signature::webauth(webauthn) => {
+      Signature::Webauth => {
+        let webauthn = sig_ptr.read::<WebAuthn>();
         let digest = get_webauthn_digest(webauthn, sig_ptr, tx_bytes);
         _public_key = secp256r1_verify(webauthn.signature, digest);
         _is_valid_signature = verify_signer_exists(_public_key, verified_signatures);
       }
       // Fuel signature
-      _ => {
+      Signature::Fuel => {
         let signature = tx_witness_data::<B512>(i_witnesses);
         _public_key = fuel_verify(signature, tx_bytes);
         _is_valid_signature = verify_signer_exists(_public_key, verified_signatures);
       }
+      _ => {}
   };
 
 
