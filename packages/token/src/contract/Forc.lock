@@ -1,0 +1,14 @@
+[[package]]
+name = 'core'
+source = 'path+from-root-D62A8C57DD8D2801'
+
+[[package]]
+name = 'project-predicate'
+source = 'member'
+dependencies = ['std']
+
+
+[[package]]
+name = "std"
+source = "git+https://github.com/fuellabs/sway?tag=v0.49.2#a70c746d27b3300beef896ccd1dcce1299836192"
+dependencies = ["core"]
