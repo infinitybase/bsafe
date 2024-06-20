@@ -46,7 +46,7 @@ export class Auth {
     this.BakoSafeAuth = {
       address: this.address,
       token: accessToken,
-      worksapce: workspace.id,
+      workspace: workspace.id,
     };
 
     this.client.setAuth(this.BakoSafeAuth);
@@ -61,7 +61,7 @@ export class Auth {
 
     this.workspace = workspace;
 
-    if (this.BakoSafeAuth) this.BakoSafeAuth.worksapce = workspace.id;
+    if (this.BakoSafeAuth) this.BakoSafeAuth.workspace = workspace.id;
     return workspace;
   }
 

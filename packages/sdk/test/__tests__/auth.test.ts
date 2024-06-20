@@ -53,7 +53,7 @@ describe('[AUTH]', () => {
 
     await auth.selectWorkspace(workspace.id);
 
-    expect(auth.workspace?.id).toBe(auth.BakoSafeAuth?.worksapce);
+    expect(auth.workspace?.id).toBe(auth.BakoSafeAuth?.workspace);
   });
 
   test('Sign by PK', async () => {
