@@ -5,12 +5,22 @@ use std::{
         tx_witness_data,
         tx_witnesses_count,
         tx_id,
+        tx_type,
+        Transaction,
         GTF_WITNESS_DATA,
+    },
+    inputs::{
+        input_count,
+    },
+    outputs::{
+        output_count,
     },
     ecr::{
         ec_recover_address,
     },
     hash::*,
+    bytes::*,
+    bytes_conversions::u64::*,
 };
 
 use libraries::{
@@ -35,32 +45,35 @@ use std::b512::{B512};
 
 
 fn main() {
-    const WEBAUTHN_TX_ID =0x361928fde57834469c1f2d9bbf858cda73d431e6b1b04149d6836a7c2e890410;
-    const WEBAUTHN_ADDRESS = 0x9962da540401d92e1d06a61a0a41428f64cadf5d821b2f7f51b9c18dfdc7d2e2;
 
-    let mut i_witnesses = 0;
-    let tx_bytes = b256_to_ascii_bytes(WEBAUTHN_TX_ID);
+    let transaction_type: Bytes = match tx_type() {
+        Transaction::Script => 0.to_be_bytes(),
+        Transaction::Create => 1.to_be_bytes(),
+        _ => 2.to_be_bytes(),
+    };
+    // verify version of sway, on browser this returned value is u16type
+    //let inputs_count:Bytes = 1_u64.to_be_bytes(); 
+    //let u64_value = u64::from(1_u8);
+    //let inputs_count = u64::from(input_count()).to_be_bytes();
     
-    while i_witnesses < tx_witnesses_count() {
+    let outputs_count = output_count().to_be_bytes();
 
-            match tx_witness_data::<Signature>(i_witnesses) {
-                // Webauthn signature
-                Signature::webauth(webauthn) => {
-                    let sig_ptr:raw_ptr = __gtf::<raw_ptr>(i_witnesses, GTF_WITNESS_DATA);
-                    let digest = get_webauthn_digest(webauthn, sig_ptr, tx_bytes);
-                    let rec = secp256r1_verify(webauthn.signature, digest);
-                    
-                    // log(rec);
-                    // log(Address::from(WEBAUTHN_ADDRESS));
-                    log(rec == Address::from(WEBAUTHN_ADDRESS));
 
-                }
-                // Fuel signature
-                _ => {
-                }
-            };
 
-        i_witnesses += 1;
-    }
+    log(transaction_type);
+    //log(inputs_count);
+    log(outputs_count);
+
+    let mut message = Bytes::new();
+    message.append(transaction_type);
+    message.append(outputs_count);
+    //message.append(Bytes::from());
+
+    let new_id = sha256(message);
+
+    log(new_id);
+    //message.append(input_count.to_be_bytes());
+    // message.append(Bytes::outputs_count);
+
 
 }

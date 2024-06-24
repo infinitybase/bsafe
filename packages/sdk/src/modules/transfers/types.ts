@@ -1,7 +1,15 @@
 import {
+  BN,
+  CoinTransactionRequestInput,
+  CoinTransactionRequestOutput,
+  InputType,
+  OutputType,
   ScriptTransactionRequest,
   TransactionRequest,
+  TransactionRequestInput,
   TransactionRequestLike,
+  TransactionRequestOutput,
+  TransactionType,
 } from 'fuels';
 import { ITransferAsset } from '../../utils/assets/types';
 import {
@@ -84,4 +92,37 @@ export interface ITransfer {
   getScript(): TransactionRequest;
   wait(): Promise<ITransactionResume | undefined>;
   getAssets(): ITransferAsset[];
+}
+
+export interface BakoSafeTransactionHash {
+  type: TransactionType;
+  script: Uint8Array;
+  scriptData: Uint8Array;
+  inputs: TransactionRequestInput[];
+  inputsCount: number;
+  outputs: TransactionRequestOutput[];
+  outputsCount: number;
+}
+
+export interface BakoSafeInputCoin
+  extends Omit<
+    CoinTransactionRequestInput,
+    'id' | 'txPointer' | 'witnessIndex' | 'predicateGasUsed'
+  > {}
+
+export interface BakoSafeOutputCoin extends CoinTransactionRequestOutput {}
+
+export interface BakoSafeSwayTransactionHash {
+  type: TransactionType;
+  //predicate:
+  // script: Uint8Array;
+  // scriptData: Uint8Array;
+  inputsCount: BN;
+  outputsCount: BN;
+
+  // //lengths
+  // scriptLength: number;
+  // scriptDataLength: number;
+  // inputs: BakoSafeInputCoin[];
+  // outputs: BakoSafeOutputCoin[];
 }

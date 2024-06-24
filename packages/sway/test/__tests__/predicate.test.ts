@@ -186,4 +186,13 @@ describe('[SWAY_PREDICATE] Send transfers', () => {
   //TODO:
   //vm deploy
   //github.com/FuelLabs/fuels-ts/blob/018efe96bde4fec5d49964fc55a725ecf9f7632e/packages/transactions/src/coders/transaction.ts#L1-L2
+
+  //TODO:
+  // create a predicate
+  // create a transaction
+  // create a person hash using tx infos, and sign this hash
+
+  // send transaction with predicate
+
+  // on sway, make a function to recover the person hash and verify if the signature is valid
 });

@@ -1,9 +1,19 @@
 import {
+  BigNumberCoder,
+  bn,
+  BN,
+  concat,
   hexlify,
+  Input,
+  InputType,
+  OutputType,
   ScriptTransactionRequest,
   TransactionRequest,
   transactionRequestify,
+  TransactionRequestInput,
+  TransactionRequestOutput,
   TransactionResponse,
+  TransactionType,
 } from 'fuels';
 import {
   ITransaction,
@@ -12,6 +22,8 @@ import {
   TransactionStatus,
 } from '../../api';
 import {
+  BakoSafeSwayTransactionHash,
+  BakoSafeTransactionHash,
   ECreationTransactiontype,
   TransferConstructor,
   TransferFactory,
@@ -94,6 +106,42 @@ export class Transfer {
     const txHash = this.transactionRequest.getTransactionId(
       this.vault.provider.getChainId(),
     );
+
+    // inputs
+    // outputs
+    // type
+    // script
+    // script data
+
+    const hash_payload: BakoSafeSwayTransactionHash = {
+      type: this.transactionRequest.type,
+      // script: this.BakoSafeScript.script,
+      // scriptData: this.BakoSafeScript.scriptData,
+      inputsCount: bn.parseUnits(
+        this.transactionRequest.inputs.length.toString(),
+      ),
+      outputsCount: bn.parseUnits(
+        this.transactionRequest.outputs.length.toString(),
+      ),
+      // inputs: this.transactionRequest.inputs.filter(
+      //   (item) => item.type === InputType.Coin,
+      // ),
+      // outputs: this.transactionRequest.outputs.filter(
+      //   (item) => item.type === OutputType.Coin,
+      // ),
+    };
+
+    const hash = concat([
+      new BigNumberCoder('u64').encode(hash_payload.type),
+      // hash_payload.script,
+      // hash_payload.scriptData,
+      new BigNumberCoder('u64').encode(hash_payload.inputsCount),
+      new BigNumberCoder('u64').encode(hash_payload.outputsCount),
+    ]);
+
+    //return hexlify(hash);
+    console.log('[MAKED_HASH]: ', hexlify(hash));
+
     return txHash.slice(2);
   }
 
