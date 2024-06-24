@@ -53,9 +53,9 @@ fn main() {
     };
     // verify version of sway, on browser this returned value is u16type
     //let inputs_count:Bytes = 1_u64.to_be_bytes(); 
-    //let u64_value = u64::from(1_u8);
+    //let u64_value = u64::from(1_u8).to_be_bytes();
     //let inputs_count = u64::from(input_count()).to_be_bytes();
-    
+
     let outputs_count = output_count().to_be_bytes();
 
 
