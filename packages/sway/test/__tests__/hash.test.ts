@@ -31,6 +31,8 @@ describe('[SWAY_PREDICATE] Send transfers', () => {
       ],
     });
 
+    console.log(predicate.address.toHexString());
+
     const tx = await createTransactionScript(predicate);
 
     tx.script = arrayify(ScriptAbi__factory.bin);

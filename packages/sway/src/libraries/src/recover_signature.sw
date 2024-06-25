@@ -11,6 +11,7 @@ use std::{
     ec_recover_address_r1
   },
 };
+
 use ::webauthn_digest::{
   WebAuthn,
 };
