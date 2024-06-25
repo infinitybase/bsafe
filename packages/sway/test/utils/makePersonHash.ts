@@ -8,6 +8,7 @@ import {
   concat,
   hexlify,
   InputType,
+  OutputType,
   sha256,
   TransactionRequest,
   TransactionRequestInput,
@@ -49,31 +50,21 @@ export interface BakoSafeSwayTransactionHash {
   // //lengths
   // scriptLength: number;
   // scriptDataLength: number;
-  inputs: BakoSafeInputCoin[];
+  inputs: TransactionRequestInput[];
 
-  // outputs: BakoSafeOutputCoin[];
+  outputs: TransactionRequestOutput[];
 }
 
 export const makePersonHash = (tx: TransactionRequest) => {
+  console.log('[TX]: ', tx.outputs);
   const hash_payload: BakoSafeSwayTransactionHash = {
     type: tx.type,
     //script: .script,
     // scriptData: this.BakoSafeScript.scriptData,
     inputsCount: tx.inputs.length,
     outputsCount: tx.outputs.length,
-    inputs: tx.inputs
-      .filter((item) => item.type === InputType.Coin)
-      .map((item) => {
-        return {
-          type: item.type,
-          amount: item.amount,
-          assetId: Address.fromString(item.assetId as string).toB256(),
-          owner: item.owner,
-        };
-      }),
-    // outputs: this.transactionRequest.outputs.filter(
-    //   (item) => item.type === OutputType.Coin,
-    // ),
+    inputs: tx.inputs,
+    outputs: tx.outputs,
   };
 
   // let inputs_hash = new Uint8Array(0);
@@ -87,24 +78,62 @@ export const makePersonHash = (tx: TransactionRequest) => {
         new BigNumberCoder('u64').encode(input.amount),
         Address.fromString(input.assetId as string).toBytes(),
         Address.fromString(input.owner as string).toBytes(),
-        // new BigNumberCoder('u64').encode(input.owner),
+      ]);
+    }
+    if (input.type === InputType.Contract) {
+      inputs_hash = concat([
+        inputs_hash,
+        new BigNumberCoder('u64').encode(input.type),
+        // Address.fromString(input.contractId as string).toBytes(), nao incluido no sway
+      ]);
+    }
+    if (input.type === InputType.Message) {
+      inputs_hash = concat([
+        inputs_hash,
+        new BigNumberCoder('u64').encode(input.type),
+        Address.fromString(input.sender as string).toBytes(),
+        Address.fromString(input.recipient as string).toBytes(),
+        new BigNumberCoder('u64').encode(input.amount),
+        // Address.fromString(input.nonce as string).toBytes(), // nao incluido no sway
       ]);
     }
   });
 
-  console.log('[MAKED_HASH]: ', {
-    hash_payload,
-    inputs: hash_payload.inputs,
-    inputs_hash,
-    inputs_hash_sha: sha256(hexlify(inputs_hash)),
-    // diff: {
-    //   sha: sha256(hexlify(inputs_hash)),
-    //   // normal: sha256(hexlify(concat([new BigNumberCoder('u64').encode(0)]))),
-    // },
-    // assetId: Address.fromString(
-    //   hash_payload.inputs[0].assetId as string,
-    // ).toBytes(),
+  let outputs_hash = new Uint8Array(0);
+  hash_payload.outputs.forEach((output) => {
+    if (output.type === OutputType.Coin) {
+      outputs_hash = concat([
+        outputs_hash,
+        new BigNumberCoder('u64').encode(output.type),
+        new BigNumberCoder('u64').encode(output.amount),
+        Address.fromString(output.assetId as string).toBytes(),
+        Address.fromString(output.to as string).toBytes(),
+      ]);
+    }
+    if (output.type === OutputType.Contract) {
+      outputs_hash = concat([
+        outputs_hash,
+        new BigNumberCoder('u64').encode(output.type),
+        // new BigNumberCoder('u64').encode(output.inputIndex), nao é possivel recuperar pelo sway
+      ]);
+    }
+    if (output.type === OutputType.Change) {
+      outputs_hash = concat([
+        outputs_hash,
+        new BigNumberCoder('u64').encode(output.type),
+        // Address.fromString(output.assetId as string).toBytes(), não é possivel recuperar pelo sway
+        // Address.fromString(output.to as string).toBytes(), não é possivel recuperar pelo sway
+      ]);
+    }
   });
+
+  //concat order
+  //  type: TransactionType;
+  //  inputsCount: number;
+  //  outputsCount: number;
+  //  inputs: TransactionRequestInput[];
+  //  outputs: TransactionRequestOutput[];
+  //  witnessSalt: Address.fromRandom().toBytes();
 
   const hash = concat([
     new BigNumberCoder('u64').encode(hash_payload.type), //number
@@ -112,7 +141,17 @@ export const makePersonHash = (tx: TransactionRequest) => {
     // hash_payload.scriptData,
     new BigNumberCoder('u64').encode(hash_payload.inputsCount), //number
     new BigNumberCoder('u64').encode(hash_payload.outputsCount), //number
+    inputs_hash,
+    outputs_hash,
+    // hash_payload.witnessSalt,
   ]);
+
+  console.log('[MAKED_HASH]: ', {
+    hash_payload,
+    inputs_hash_sha: sha256(hexlify(inputs_hash)),
+    outputs_hash_sha: sha256(hexlify(outputs_hash)),
+    hash: sha256(hexlify(hash)),
+  });
 
   return sha256(hexlify(hash));
 };
