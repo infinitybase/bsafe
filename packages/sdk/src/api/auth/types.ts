@@ -17,7 +17,7 @@ export interface Workspace {
 export interface IBakoSafeAuth {
   address: string;
   token: string;
-  worksapce?: string;
+  workspace?: string;
 }
 
 export interface IAuthCreateRequest {
