@@ -29,7 +29,7 @@ export const DEFAULT_BALANCES = [
 ];
 
 export const DEFAULT_MULTI_ASSET_BALANCES = [
-  { assetId: assets['ETH'], amount: DEFAULT_BALANCE_VALUE },
+  { assetId: assets['ETH'], amount: bn(VALUES_DEFAULT_TO_MUL['10000']) },
   { assetId: assets['BTC'], amount: DEFAULT_BALANCE_VALUE },
   { assetId: assets['USDC'], amount: DEFAULT_BALANCE_VALUE },
   { assetId: assets['UNI'], amount: DEFAULT_BALANCE_VALUE },

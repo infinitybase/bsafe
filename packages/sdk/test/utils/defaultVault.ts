@@ -27,14 +27,18 @@ export const newVault = async (
     VALUES_DEFAULT_TO_MUL[reason ?? 1],
   );
 
-  if (assetIds) {
-    for await (const assetId of assetIds) {
-      await sendPredicateCoins(vault!, new_balance, assetId, rootWallet);
-    }
-  } else {
-    const baseAssetId = vault.provider.getBaseAssetId();
-    await sendPredicateCoins(vault!, new_balance, baseAssetId, rootWallet);
+  // if (assetIds) {
+  // @ts-ignore
+  if (!assetIds || assetIds?.length === 0) return vault;
+
+  for await (const assetId of assetIds) {
+    await sendPredicateCoins(vault!, new_balance, assetId, rootWallet);
   }
+  // }
+  //  else {
+  //   const baseAssetId = vault.provider.getBaseAssetId();
+  //   await sendPredicateCoins(vault!, new_balance, baseAssetId, rootWallet);
+  // }
 
   return vault;
 };

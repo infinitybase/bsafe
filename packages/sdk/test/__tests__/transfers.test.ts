@@ -482,4 +482,69 @@ describe('[TRANSFERS]', () => {
       'FuelError: not enough coins to fit the target',
     );
   });
+
+  // |
+  test.only('Outro', async () => {
+    // Criar um vault e adicionar balance: ETH e USDC
+    // criar um segundo vault com nome: Store Vault
+    // Criar uma tx no primeiro vault com endereço das moedas para Store Vault
+    // Verificar o saldo em Store vault se é igual ao valor depositado da tx criada pelo primeiro vault.
+    const txAssets = [assets.ETH, assets.USDC];
+
+    const primeiroVault = await newVault(
+      signers,
+      provider,
+      auth['USER_1'].BakoSafeAuth,
+      100,
+      1,
+      txAssets,
+    );
+
+    const storeVault = await newVault(
+      signers,
+      provider,
+      auth['USER_1'].BakoSafeAuth,
+      100,
+      1,
+    );
+
+    const tx = DEFAULT_MULTI_ASSET_TRANSACTION_PAYLOAD(
+      storeVault.address.toString(),
+      txAssets,
+    );
+
+    const tx_bako = await primeiroVault.BakoSafeIncludeTransaction(tx);
+
+    await signin(
+      tx_bako.getHashTxId(),
+      'USER_1',
+      auth['USER_1'].BakoSafeAuth,
+      tx_bako.BakoSafeTransactionId,
+    );
+
+    const result = await tx_bako.send();
+
+    console.log('tx', result);
+
+    const balances = (await primeiroVault.getBalances()).map((balance) => ({
+      ...balance,
+      amount: balance.amount.format(),
+    }));
+
+    console.log('balance após tx assinada', await storeVault.getBalances());
+
+    const aux = await Vault.create({
+      id: tx_bako.BakoSafeTransactionId,
+      address: auth['USER_1'].address,
+      token: auth['USER_1'].BakoSafeAuth.token,
+    });
+
+    console.log(aux);
+
+    const history = await storeVault.BakoSafeGetTransactions();
+    console.log(history);
+
+    // console.log(JSON.stringify(tx));
+    // console.log('tx_bako:', JSON.stringify(tx_bako.transactionRequest));
+  });
 });

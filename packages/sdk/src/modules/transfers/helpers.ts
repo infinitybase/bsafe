@@ -58,6 +58,8 @@ export const formatTransaction = async ({
       vault.provider,
     );
 
+    // console.log('caiu aqui?', outputs);
+
     const _coins = await vault.getResourcesToSpend(transactionCoins);
 
     const script_t = new BakoSafeScriptTransaction();

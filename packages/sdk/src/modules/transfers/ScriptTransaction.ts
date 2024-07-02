@@ -48,6 +48,7 @@ export class BakoSafeScriptTransaction extends ScriptTransactionRequest {
         value.assetId,
       );
     });
+    console.log('outputs', outputs);
 
     //todo: invalidate used coins [make using BakoSafe api assets?] UTXO PROBLEM
     this.addResources(_coins);
